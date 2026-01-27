@@ -144,3 +144,82 @@ function clearSavedConfig() {
 $("savecfg")?.addEventListener("click", saveConfig);
 $("loadcfg")?.addEventListener("click", loadConfig);
 $("clearcfg")?.addEventListener("click", clearSavedConfig);
+
+// =======================
+// Compartilhar via URL
+// =======================
+const SHARE_KEY = "cfg"; // querystring ?cfg=...
+
+function base64urlEncode(str) {
+  // UTF-8 safe -> base64 -> url safe
+  const utf8 = new TextEncoder().encode(str);
+  let bin = "";
+  utf8.forEach(b => bin += String.fromCharCode(b));
+  const b64 = btoa(bin).replaceAll("+", "-").replaceAll("/", "_").replaceAll("=", "");
+  return b64;
+}
+
+function base64urlDecode(b64url) {
+  let b64 = b64url.replaceAll("-", "+").replaceAll("_", "/");
+  // pad
+  while (b64.length % 4) b64 += "=";
+
+  const bin = atob(b64);
+  const bytes = new Uint8Array([...bin].map(ch => ch.charCodeAt(0)));
+  return new TextDecoder().decode(bytes);
+}
+
+function getShareState({ includeToken = false } = {}) {
+  const st = getFormState(); // sua função já existente (do localStorage)
+  if (!includeToken) st.token = ""; // não vazar token no link
+  return st;
+}
+
+function makeShareLink() {
+  const includeToken = false; // <- mude para true só se quiser compartilhar token (não recomendado)
+  const state = getShareState({ includeToken });
+
+  const payload = JSON.stringify({
+    v: 1,
+    state
+  });
+
+  const encoded = base64urlEncode(payload);
+
+  const u = new URL(window.location.href);
+  u.searchParams.set(SHARE_KEY, encoded);
+
+  $("sharelink").value = u.toString();
+  $("pill").textContent = "Link gerado";
+}
+
+function loadFromShareLink() {
+  const u = new URL(window.location.href);
+  const encoded = u.searchParams.get(SHARE_KEY);
+  if (!encoded) return false;
+
+  try {
+    const decoded = base64urlDecode(encoded);
+    const obj = JSON.parse(decoded);
+    if (obj?.state) {
+      setFormState(obj.state);  // sua função já existente
+      $("pill").textContent = "Config carregada pelo link";
+      return true;
+    }
+  } catch (e) {
+    console.error("Erro ao carregar cfg do link:", e);
+  }
+  return false;
+}
+
+$("genshare")?.addEventListener("click", makeShareLink);
+
+$("copyshare")?.addEventListener("click", async () => {
+  const v = $("sharelink").value.trim();
+  if (!v) return alert("Gere o link primeiro.");
+  await navigator.clipboard.writeText(v);
+  $("pill").textContent = "Link copiado";
+});
+
+// Auto-carregar se vier por link
+loadFromShareLink();
