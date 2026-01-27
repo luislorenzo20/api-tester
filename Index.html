@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>API Tester (HTML) — Token manual</title>
+
+  <!-- CSS separado -->
+  <link rel="stylesheet" href="styles.css" />
+</head>
+
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <div class="logo"></div>
+      <div>
+        <h1>API Tester (HTML)</h1>
+        <div class="sub">Teste APIs usando Bearer Token</div>
+      </div>
+    </div>
+    <div class="pill" id="pill">Pronto</div>
+  </header>
+
+  <div class="grid">
+    <!-- REQUEST -->
+    <div class="card">
+      <div class="hd">
+        <p class="title">Request</p>
+        <span class="hint">auth + método + URL</span>
+      </div>
+
+      <!-- AUTH -->
+      <div class="row">
+        <div>
+          <label>Auth Scheme</label>
+          <select id="scheme">
+            <option>Bearer</option>
+            <option>Token</option>
+          </select>
+        </div>
+        <div style="flex:3">
+          <label>Token</label>
+          <input id="token" placeholder="cole seu access_token aqui" />
+        </div>
+      </div>
+
+      <!-- MÉTODO -->
+      <div class="row">
+        <div>
+          <label>Método</label>
+          <select id="method">
+            <option>GET</option>
+            <option>POST</option>
+            <option>PUT</option>
+            <option>PATCH</option>
+            <option>DELETE</option>
+          </select>
+        </div>
+        <div style="flex:2">
+          <label>URL</label>
+          <input id="url" placeholder="https://api..." />
+        </div>
+      </div>
+
+      <label>Query Params (JSON)</label>
+      <textarea id="params"></textarea>
+
+      <label>Headers extras (JSON)</label>
+      <textarea id="headers"></textarea>
+
+      <label>Body (JSON)</label>
+      <textarea id="body"></textarea>
+
+      <div class="btnrow">
+        <button class="primary" id="send">Enviar</button>
+        <button id="clear">Limpar</button>
+        <button id="copycurl">Copiar cURL</button>
+      </div>
+    </div>
+
+    <!-- RESPONSE -->
+    <div class="card">
+      <div class="hd">
+        <p class="title">Response</p>
+        <span class="hint" id="meta">status / tempo</span>
+      </div>
+
+      <div class="small" id="statusline">Status: —</div>
+      <pre id="out">{}</pre>
+    </div>
+  </div>
+</div>
+
+<!-- JS separado -->
+<script src="app.js"></script>
+</body>
+</html>
