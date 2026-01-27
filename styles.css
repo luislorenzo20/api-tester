@@ -159,3 +159,61 @@ pre{
   font-size:12px;
   color:var(--muted);
 }
+
+/* Response Tabs */
+.tabs{
+  display:flex;
+  gap:8px;
+  margin:12px 0 10px;
+}
+
+.tab{
+  padding:8px 10px;
+  border-radius:999px;
+  border:1px solid var(--line);
+  background:#020617;
+  color:var(--text);
+  cursor:pointer;
+  font-weight:800;
+  font-size:12px;
+}
+
+.tab.active{
+  background: rgba(96,165,250,.18);
+  border-color: rgba(96,165,250,.45);
+}
+
+.tabpanel.hidden{ display:none; }
+
+/* Summary Card */
+.summary{
+  border:1px solid var(--line);
+  background: rgba(2,6,23,.25);
+  border-radius:14px;
+  padding:12px;
+}
+
+.summary-row{
+  display:flex;
+  justify-content:space-between;
+  gap:12px;
+  padding:10px 6px;
+  border-bottom:1px solid rgba(148,163,184,.12);
+}
+
+.summary-row:last-child{ border-bottom:none; }
+
+.summary-k{
+  color:var(--muted);
+  font-size:12px;
+  font-weight:800;
+  min-width:110px;
+}
+
+.summary-v{
+  font-size:12px;
+  text-align:right;
+  font-family: var(--mono);
+  color: var(--text);
+  overflow-wrap:anywhere;
+}

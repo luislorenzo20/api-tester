@@ -29,7 +29,7 @@
         <p class="title">Request</p>
         <span class="hint">auth + método + URL</span>
       </div>
-      
+
       <!-- AUTH -->
       <div class="row">
         <div>
@@ -91,15 +91,60 @@
     </div>
 
     <!-- RESPONSE -->
-    <div class="card">
-      <div class="hd">
-        <p class="title">Response</p>
-        <span class="hint" id="meta">status / tempo</span>
+<div class="card">
+  <div class="hd">
+    <p class="title">Response</p>
+    <span class="hint" id="meta">status / tempo</span>
+  </div>
+
+  <div class="small" id="statusline">Status: —</div>
+
+  <!-- Tabs -->
+  <div class="tabs" role="tablist" aria-label="Response tabs">
+    <button class="tab active" id="tabJson" type="button">JSON</button>
+    <button class="tab" id="tabResumo" type="button">Resumo</button>
+  </div>
+
+  <!-- JSON view -->
+  <div class="tabpanel" id="panelJson">
+    <pre id="out">{}</pre>
+  </div>
+
+  <!-- Summary view -->
+  <div class="tabpanel hidden" id="panelResumo">
+    <div class="summary">
+      <div class="summary-row">
+        <div class="summary-k">Código</div>
+        <div class="summary-v" id="sumCodigo">—</div>
       </div>
 
-      <div class="small" id="statusline">Status: —</div>
-      <pre id="out">{}</pre>
+      <div class="summary-row">
+        <div class="summary-k">Nome</div>
+        <div class="summary-v" id="sumNome">—</div>
+      </div>
+
+      <div class="summary-row">
+        <div class="summary-k">Nascimento</div>
+        <div class="summary-v" id="sumNasc">—</div>
+      </div>
+
+      <div class="summary-row">
+        <div class="summary-k">Cidade</div>
+        <div class="summary-v" id="sumCidade">—</div>
+      </div>
+
+      <div class="summary-row">
+        <div class="summary-k">Estado</div>
+        <div class="summary-v" id="sumEstado">—</div>
+      </div>
+
+      <div class="summary-row">
+        <div class="summary-k">Endereço</div>
+        <div class="summary-v" id="sumEndereco">—</div>
+      </div>
     </div>
+  </div>
+</div>
   </div>
 </div>
 

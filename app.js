@@ -39,11 +39,24 @@ $("send").onclick = async () => {
     $("meta").textContent = `status ${resp.status} • ${time} ms`;
 
     const txt = await resp.text();
-    try {
-      $("out").textContent = JSON.stringify(JSON.parse(txt), null, 2);
-    } catch {
-      $("out").textContent = txt;
-    }
+
+      let parsed = null;
+      try {
+        parsed = JSON.parse(txt);
+        $("out").textContent = JSON.stringify(parsed, null, 2);
+        fillSummary(parsed);              // ✅ preenche a aba Resumo
+      } catch {
+        $("out").textContent = txt;
+        clearSummary(); 
+        setResponseTab("json");                  // ✅ se não for JSON, limpa resumo
+      }
+
+      // opcional: se a resposta for OK e JSON, ir automaticamente para "Resumo"
+      if (resp.ok && parsed) {
+        setResponseTab("resumo");         // comente esta linha se preferir ficar no JSON
+      } else {
+        setResponseTab("json");
+      }
 
     $("statusline").textContent = `Status: ${resp.status}`;
     $("pill").textContent = "OK";
@@ -52,6 +65,29 @@ $("send").onclick = async () => {
     $("out").textContent = String(e);
   }
 };
+
+function safeGet(obj, path, fallback="—") {
+  try {
+    return path.split(".").reduce((acc, key) => acc?.[key], obj) ?? fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+function fillSummary(data) {
+  $("sumCodigo").textContent = safeGet(data, "naturalPersonCode");
+  $("sumNome").textContent   = safeGet(data, "personName");
+  $("sumNasc").textContent   = safeGet(data, "birthDate");
+  $("sumCidade").textContent = safeGet(data, "establishment.legal.city");
+  $("sumEstado").textContent = safeGet(data, "establishment.legal.state");
+  $("sumEndereco").textContent = safeGet(data, "establishment.legal.address");
+}
+
+function clearSummary() {
+  ["sumCodigo","sumNome","sumNasc","sumCidade","sumEstado","sumEndereco"]
+    .forEach(id => { const el = $(id); if (el) el.textContent = "—"; });
+}
+
 
 $("clear").onclick = () => {
   ["url","token","params","headers","body"].forEach(id => $(id).value = "");
@@ -223,3 +259,14 @@ $("copyshare")?.addEventListener("click", async () => {
 
 // Auto-carregar se vier por link
 loadFromShareLink();
+
+function setResponseTab(which) {
+  const isJson = which === "json";
+  $("tabJson")?.classList.toggle("active", isJson);
+  $("tabResumo")?.classList.toggle("active", !isJson);
+  $("panelJson")?.classList.toggle("hidden", !isJson);
+  $("panelResumo")?.classList.toggle("hidden", isJson);
+}
+
+$("tabJson")?.addEventListener("click", () => setResponseTab("json"));
+$("tabResumo")?.addEventListener("click", () => setResponseTab("resumo"));
