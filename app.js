@@ -73,3 +73,74 @@ $("copycurl").onclick = async () => {
   await navigator.clipboard.writeText(curl);
   $("pill").textContent = "cURL copiado";
 };
+
+// =======================
+// Persistência (localStorage)
+// =======================
+const STORAGE_KEY = "api_tester_saved_config_v1";
+
+function getFormState() {
+  return {
+    scheme: $("scheme").value,
+    token: $("token").value,        // ⚠️ opcional salvar token (veja nota abaixo)
+    method: $("method").value,
+    url: $("url").value,
+    params: $("params").value,
+    headers: $("headers").value,
+    body: $("body").value
+  };
+}
+
+function setFormState(state) {
+  if (!state) return;
+  if (state.scheme !== undefined) $("scheme").value = state.scheme;
+  if (state.token !== undefined) $("token").value = state.token;
+  if (state.method !== undefined) $("method").value = state.method;
+  if (state.url !== undefined) $("url").value = state.url;
+  if (state.params !== undefined) $("params").value = state.params;
+  if (state.headers !== undefined) $("headers").value = state.headers;
+  if (state.body !== undefined) $("body").value = state.body;
+}
+
+function saveConfig() {
+  const state = getFormState();
+  localStorage.setItem(STORAGE_KEY, JSON.stringify({
+    savedAt: new Date().toISOString(),
+    state
+  }));
+  $("pill").textContent = "Config salva";
+}
+
+function loadConfig() {
+  const raw = localStorage.getItem(STORAGE_KEY);
+  if (!raw) {
+    alert("Nenhuma configuração salva ainda.");
+    return;
+  }
+  const obj = JSON.parse(raw);
+  setFormState(obj.state);
+  $("pill").textContent = "Config carregada";
+}
+
+function clearSavedConfig() {
+  localStorage.removeItem(STORAGE_KEY);
+  $("pill").textContent = "Salvos apagados";
+}
+
+// Auto-carregar ao abrir a página (opcional)
+(function autoLoad() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return;
+    const obj = JSON.parse(raw);
+    setFormState(obj.state);
+    $("pill").textContent = "Config restaurada";
+  } catch (e) {
+    // ignora
+  }
+})();
+
+// Liga botões
+$("savecfg")?.addEventListener("click", saveConfig);
+$("loadcfg")?.addEventListener("click", loadConfig);
+$("clearcfg")?.addEventListener("click", clearSavedConfig);
