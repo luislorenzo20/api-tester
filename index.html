@@ -29,7 +29,7 @@
         <p class="title">Request</p>
         <span class="hint">auth + método + URL</span>
       </div>
-
+      
       <!-- AUTH -->
       <div class="row">
         <div>
@@ -71,6 +71,14 @@
 
       <label>Body (JSON)</label>
       <textarea id="body"></textarea>
+
+      <label>Link compartilhável</label>
+<div class="row">
+  <input id="sharelink" placeholder="Clique em 'Gerar link'..." readonly />
+  <button id="genshare">Gerar link</button>
+  <button id="copyshare">Copiar</button>
+</div>
+<div class="small">Dica: por segurança, o token pode ficar fora do link.</div>
 
       <div class="btnrow">
         <button class="primary" id="send">Enviar</button>
