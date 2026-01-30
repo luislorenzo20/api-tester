@@ -17,12 +17,21 @@ $("send").onclick = async () => {
     const extraHeaders = $("headers").value.trim();
     if (extraHeaders) Object.assign(headers, JSON.parse(extraHeaders));
 
-    const params = $("params").value.trim();
+    const paramsObj = readParamsTable();
     let finalUrl = url;
-    if (params) {
-      const q = new URLSearchParams(JSON.parse(params)).toString();
-      finalUrl += "?" + q;
+
+    if (paramsObj && Object.keys(paramsObj).length) {
+      const sp = new URLSearchParams();
+      Object.entries(paramsObj).forEach(([k, v]) => {
+        if (v === null || v === undefined) return;
+        sp.set(k, String(v));
+      });
+
+      // se a URL já tiver ?, preserva e adiciona
+      const sep = finalUrl.includes("?") ? "&" : "?";
+      finalUrl = finalUrl + sep + sp.toString();
     }
+
 
     const bodyTxt = $("body").value.trim();
     const body = bodyTxt ? JSON.parse(bodyTxt) : null;
@@ -66,6 +75,50 @@ $("send").onclick = async () => {
   }
 };
 
+
+function addParamRow(key = "", value = "") {
+  const tb = $("paramsBody");
+  const tr = document.createElement("tr");
+
+  tr.innerHTML = `
+    <td><input class="kvinput" data-k="key"  placeholder="ex: naturalPersonCode" value="${escapeHtmlAttr(key)}"></td>
+    <td><input class="kvinput" data-k="val"  placeholder="ex: 110" value="${escapeHtmlAttr(value)}"></td>
+    <td>
+      <div class="kvactions">
+        <button type="button" data-act="del">Remover</button>
+      </div>
+    </td>
+  `;
+
+  tr.querySelector('[data-act="del"]').addEventListener("click", () => tr.remove());
+  tb.appendChild(tr);
+}
+
+function escapeHtmlAttr(s) {
+  return String(s ?? "")
+    .replaceAll("&","&amp;")
+    .replaceAll('"',"&quot;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;");
+}
+
+function readParamsTable() {
+  const tb = $("paramsBody");
+  const params = {};
+  [...tb.querySelectorAll("tr")].forEach(tr => {
+    const k = tr.querySelector('input[data-k="key"]')?.value?.trim();
+    const v = tr.querySelector('input[data-k="val"]')?.value ?? "";
+    if (!k) return;
+    params[k] = v; // tudo como string mesmo
+  });
+  return params;
+}
+
+// Buttons (params)
+$("addParam")?.addEventListener("click", () => addParamRow());
+$("clearParams")?.addEventListener("click", () => { $("paramsBody").innerHTML = ""; });
+
+
 function safeGet(obj, path, fallback="—") {
   try {
     return path.split(".").reduce((acc, key) => acc?.[key], obj) ?? fallback;
@@ -76,15 +129,17 @@ function safeGet(obj, path, fallback="—") {
 
 function fillSummary(data) {
   $("sumCodigo").textContent = safeGet(data, "naturalPersonCode");
+  $("sumProntuario").textContent = safeGet(data, "medicalRecord");
   $("sumNome").textContent   = safeGet(data, "personName");
-  $("sumNasc").textContent   = safeGet(data, "birthDate");
+  const birthDate = safeGet(data, "birthDate", "");
+    $("sumNasc").textContent = formatDateBR(birthDate);
   $("sumCidade").textContent = safeGet(data, "establishment.legal.city");
   $("sumEstado").textContent = safeGet(data, "establishment.legal.state");
   $("sumEndereco").textContent = safeGet(data, "establishment.legal.address");
 }
 
 function clearSummary() {
-  ["sumCodigo","sumNome","sumNasc","sumCidade","sumEstado","sumEndereco"]
+  ["sumCodigo", "sumProntuario", "sumNome","sumNasc","sumCidade","sumEstado","sumEndereco"]
     .forEach(id => { const el = $(id); if (el) el.textContent = "—"; });
 }
 
@@ -110,6 +165,17 @@ $("copycurl").onclick = async () => {
   $("pill").textContent = "cURL copiado";
 };
 
+function formatDateBR(dateStr) {
+  if (!dateStr || typeof dateStr !== "string") return "—";
+
+  // espera YYYY-MM-DD
+  const parts = dateStr.split("-");
+  if (parts.length !== 3) return dateStr;
+
+  const [year, month, day] = parts;
+  return `${day}/${month}/${year}`;
+}
+
 // =======================
 // Persistência (localStorage)
 // =======================
@@ -121,7 +187,7 @@ function getFormState() {
     token: $("token").value,        // ⚠️ opcional salvar token (veja nota abaixo)
     method: $("method").value,
     url: $("url").value,
-    params: $("params").value,
+    params: readParamsTable(),
     headers: $("headers").value,
     body: $("body").value
   };
@@ -133,10 +199,15 @@ function setFormState(state) {
   if (state.token !== undefined) $("token").value = state.token;
   if (state.method !== undefined) $("method").value = state.method;
   if (state.url !== undefined) $("url").value = state.url;
-  if (state.params !== undefined) $("params").value = state.params;
-  if (state.headers !== undefined) $("headers").value = state.headers;
-  if (state.body !== undefined) $("body").value = state.body;
-}
+  if (state.params !== undefined) {
+      $("paramsBody").innerHTML = "";
+      const p = state.params || {};
+      Object.entries(p).forEach(([k,v]) => addParamRow(k, v));
+    }
+
+      if (state.headers !== undefined) $("headers").value = state.headers;
+      if (state.body !== undefined) $("body").value = state.body;
+    }
 
 function saveConfig() {
   const state = getFormState();
@@ -180,6 +251,21 @@ function clearSavedConfig() {
 $("savecfg")?.addEventListener("click", saveConfig);
 $("loadcfg")?.addEventListener("click", loadConfig);
 $("clearcfg")?.addEventListener("click", clearSavedConfig);
+
+
+// Mostrar / ocultar token
+const tokenInput = document.getElementById("token");
+const toggleBtn = document.getElementById("toggleToken");
+const iconEye = document.getElementById("iconEye");
+const iconEyeOff = document.getElementById("iconEyeOff");
+
+toggleBtn?.addEventListener("click", () => {
+  const hidden = tokenInput.type === "password";
+  tokenInput.type = hidden ? "text" : "password";
+
+  iconEye.classList.toggle("hidden", hidden);
+  iconEyeOff.classList.toggle("hidden", !hidden);
+});
 
 // =======================
 // Compartilhar via URL

@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>API Tester (HTML) — Token manual</title>
+  <title>API Tester (TASY) — Token manual</title>
 
   <!-- CSS separado -->
   <link rel="stylesheet" href="styles.css" />
@@ -15,7 +15,7 @@
     <div class="brand">
       <div class="logo"></div>
       <div>
-        <h1>API Tester (HTML)</h1>
+        <h1>API Tester (TASY)</h1>
         <div class="sub">Teste APIs usando Bearer Token</div>
       </div>
     </div>
@@ -40,8 +40,23 @@
           </select>
         </div>
         <div style="flex:3">
-          <label>Token</label>
-          <input id="token" placeholder="cole seu access_token aqui" />
+            <label>Token</label>
+              <div class="token-wrap">
+                <input id="token" type="password" placeholder="cole seu access_token aqui" />
+
+                <button type="button" class="token-toggle" id="toggleToken" aria-label="Mostrar/ocultar token">
+                  <!-- Eye (hidden) -->
+                  <svg id="iconEye" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                    <path d="M12 5c-5 0-9 4.5-10 7 1 2.5 5 7 10 7s9-4.5 10-7c-1-2.5-5-7-10-7zm0 12a5 5 0 1 1 0-10 5 5 0 0 1 0 10z"/>
+                    <circle cx="12" cy="12" r="2.5"/>
+                  </svg>
+
+                  <!-- Eye off (shown) -->
+                  <svg id="iconEyeOff" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="hidden">
+                    <path d="M2 2l20 20M12 5c-5 0-9 4.5-10 7 1 2.5 5 7 10 7 2.1 0 4-.7 5.6-1.8M9.5 9.5A3.5 3.5 0 0 0 12 15.5c.7 0 1.4-.2 2-.6"/>
+                  </svg>
+                </button>
+              </div>
         </div>
       </div>
 
@@ -63,8 +78,30 @@
         </div>
       </div>
 
-      <label>Query Params (JSON)</label>
-      <textarea id="params"></textarea>
+      <label>Query Params</label>
+
+<div class="kvwrap">
+  <table class="kv" aria-label="Query params">
+    <thead>
+      <tr>
+        <th>Parâmetro</th>
+        <th>Valor</th>
+      </tr>
+    </thead>
+    <tbody id="paramsBody">
+      <!-- linhas vão aqui -->
+    </tbody>
+  </table>
+
+  <div class="kvbtns">
+    <button type="button" id="addParam">Adicionar</button>
+    <button type="button" id="clearParams">Limpar</button>
+  </div>
+
+  <div class="small">
+    Os parâmetros acima serão enviados na URL como <code>?chave=valor</code>.
+  </div>
+</div>
 
       <label>Headers extras (JSON)</label>
       <textarea id="headers"></textarea>
@@ -116,6 +153,11 @@
       <div class="summary-row">
         <div class="summary-k">Código</div>
         <div class="summary-v" id="sumCodigo">—</div>
+      </div>
+
+      <div class="summary-row">
+       <div class="summary-k">Prontuário</div>
+        <div class="summary-v" id="sumProntuario">—</div>
       </div>
 
       <div class="summary-row">
